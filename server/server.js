@@ -11,11 +11,11 @@ const PORT = 3000;
 const slackToken = 'xoxb-103936655043-6LPcSmUKC57lCfBbWBKeWJPo';
 const slackLogLvl = 'debug';
 
-var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
+const witToken = 'DOQURYFV3EWRBN3VYIBP2NB5UXFAEUFB';
+const witClient = require('./witClient.js').witClient(witToken);
 
 
-// console.log(typeof slackClient);
-const rtm = slackClient.connect(slackToken, slackLogLvl);
+const rtm = slackClient.connect(slackToken, slackLogLvl, witClient);
 
 
 slackClient.addAuthenticatedHandler(rtm, () => listen);
@@ -29,7 +29,6 @@ var listen = app.listen(PORT, () => {
 
 
 server.on('listening', () => {
-	console.log(server);
 	console.log(`server is listening on ${server.address().port} in ${server.get('env')} mode`);
 });
 
