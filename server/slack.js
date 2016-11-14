@@ -21,22 +21,44 @@ let addAuthenticatedHandler = (rtm, handler) => {
 };
 
 let handleOnMessage = (message) => {
-	nlp.ask(message.text, (err, res) => {
-		if(err){
-			console.log(err);
-			return;
-		}
-		if(!res.intent) {
-			return rtm.sendMessage('Sorry I don\'t undertand what you are talking about.', message.channel);
-		}
-		else if(res.intent[0].value =='time' && res.location){
-			return rtm.sendMessage(`I don't yet know the time in ${res.location[0].value}`, message.channel);
-		}
-		else {
-			console.log('err response: ',res);
-			return rtm.sendMessage('Sorry I don\'t undertand what you are talking about.', message.channel);
-		}
-	});
+	if (message.text.toLowerCase().includes('lazybot')) {
+		nlp.ask(message.text, (err, res) => {
+			if (err) {
+				console.log(err);
+				return;
+			}
+
+			try{
+				if(!res.intent || !res.intent[0] || !res.intent[0].value){
+					throw new Error('Could not extract intent');
+				}
+				//only require according to intent response
+				const intent = require('./intents/'+res.intent[0].value+'Intent');
+				intent.process(res, function(err, res){
+					if(err){
+						console.log(err.message);
+						return;
+					}
+					return rtm.sendMessage(res, message.channel);
+				});
+
+			}
+			catch(err){
+				console.log('error:',err);
+				console.log('response:',res);
+				rtm.sendMessage(`Sorry, I don't understand what you are talking about`, message.channel);
+			}
+
+			// if (!res.intent) {
+			// 	return rtm.sendMessage('Sorry I don\'t undertand what you are talking about.', message.channel);
+			// } else if (res.intent[0].value == 'time' && res.location) {
+			// 	return rtm.sendMessage(`I don't yet know the time in ${res.location[0].value}`, message.channel);
+			// } else {
+			// 	console.log('err response: ', res);
+			// 	return rtm.sendMessage('Sorry I don\'t undertand what you are talking about.', message.channel);
+			// }
+		});
+	}
 };
 
 
@@ -46,7 +68,9 @@ let addWelcomeMsgHandler = (rtm, handleOnMessage) => {
 
 
 module.exports.connect = (bot_token, debugLvl, nlpClient) => {
-	rtm = new RtmClient(bot_token, {logLevel: debugLvl});
+	rtm = new RtmClient(bot_token, {
+		logLevel: debugLvl
+	});
 	nlp = nlpClient;
 	addAuthenticatedHandler(rtm, handleOnAuthenticated);
 	addWelcomeMsgHandler(rtm, handleOnMessage);
