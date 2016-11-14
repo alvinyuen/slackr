@@ -49,14 +49,6 @@ let handleOnMessage = (message) => {
 				rtm.sendMessage(`Sorry, I don't understand what you are talking about`, message.channel);
 			}
 
-			// if (!res.intent) {
-			// 	return rtm.sendMessage('Sorry I don\'t undertand what you are talking about.', message.channel);
-			// } else if (res.intent[0].value == 'time' && res.location) {
-			// 	return rtm.sendMessage(`I don't yet know the time in ${res.location[0].value}`, message.channel);
-			// } else {
-			// 	console.log('err response: ', res);
-			// 	return rtm.sendMessage('Sorry I don\'t undertand what you are talking about.', message.channel);
-			// }
 		});
 	}
 };
