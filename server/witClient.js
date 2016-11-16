@@ -1,37 +1,44 @@
 'use strict'
 
 const request = require('superagent');
+const apiKeyModel = require('../model/api.js');
 
 
-var handleWitResponse = (res) => {
+let handleWitResponse = (res) => {
 	return res.entities;
 };
 
 
-module.exports.witClient = function (token){
+let getWitResponse = (token, message, cb) => {
+	request.get('https://api.wit.ai/message')
+		.set('Authorization', ' Bearer ' + token)
+		.query({
+			v: '20161115'
+		})
+		.query({
+			q: message
+		})
+		.end((err, res) => {
+			if (err) return cb(err);
+			if (res.statusCode != 200) return cb('Expected status 200 but got' + res.statusCode);
+			console.log('status:' + res.statusCode);
+			const witResponse = handleWitResponse(res.body);
 
-	const ask = function ask(message, cb){
+			cb(null, witResponse);
+		});
+};
 
-		request.get('https://api.wit.ai/message')
-			.set('Authorization', ' Bearer '+ token)
-			.query({v: '20161113'})
-			.query({q: message})
-			.end((err, res) => {
-				if(err) return cb(err);
-				if(res.statusCode != 200) return cb('Expected status 200 but got' + res.statusCode);
 
-				console.log('status:'+res.statusCode);
-				const witResponse = handleWitResponse(res.body);
+module.exports.witClient = function() {
 
-				cb(null, witResponse);
+	const ask = function ask(message, cb) {
+		apiKeyModel.getWitAi()
+			.then(function(apiKey) {
+				getWitResponse(apiKey.key, message, cb);
 			});
-
-		console.log('ask:'+ message);
-		console.log('token:'+ token);
 	};
 
 	return {
-		ask:ask
+		ask: ask
 	};
-
-}
+};

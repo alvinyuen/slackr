@@ -4,7 +4,8 @@
   "description": "",
   "main": "server/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./server/server.js"
   },
   "author": "",
   "license": "ISC",
@@ -12,6 +13,9 @@
     "@slack/client": "^3.6.1",
     "express": "^4.14.0",
     "moment": "^2.16.0",
+    "pg": "^6.1.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.25.0",
     "superagent": "^2.3.0"
   }
 }

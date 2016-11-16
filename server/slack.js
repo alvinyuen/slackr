@@ -22,6 +22,7 @@ let addAuthenticatedHandler = (rtm, handler) => {
 
 let handleOnMessage = (message) => {
 	if (message.text.toLowerCase().includes('lazybot')) {
+
 		nlp.ask(message.text, (err, res) => {
 			if (err) {
 				console.log(err);
@@ -60,6 +61,8 @@ let addWelcomeMsgHandler = (rtm, handleOnMessage) => {
 
 
 module.exports.connect = (bot_token, debugLvl, nlpClient) => {
+
+
 	rtm = new RtmClient(bot_token, {
 		logLevel: debugLvl
 	});
