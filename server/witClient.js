@@ -28,17 +28,14 @@ let getWitResponse = (token, message, cb) => {
 		});
 };
 
-
-module.exports.witClient = function() {
-
-	const ask = function ask(message, cb) {
-		apiKeyModel.getWitAi()
+let ask = (message, cb) => {
+	apiKeyModel.getWitAi()
 			.then(function(apiKey) {
 				getWitResponse(apiKey.key, message, cb);
 			});
-	};
+};
 
-	return {
-		ask: ask
-	};
+
+module.exports.witClient = {
+	ask:ask
 };

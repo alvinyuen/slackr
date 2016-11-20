@@ -6,28 +6,28 @@ const server = http.createServer(app);
 
 const PORT = 1337;
 
+//services
 const timeServiceRouter = require('../route/timeService.js');
-
-const slackToken = 'xoxb-103936655043-6LPcSmUKC57lCfBbWBKeWJPo';
-const slackLogLvl = 'debug';
 const slackClient = require('./slack.js');
-const witClient = require('./witClient.js').witClient();
+
+//models
 const apiKeyModel = require('../model/api.js');
 
 
-const rtm = slackClient.connect(slackToken, slackLogLvl, witClient);
+const slackLogLvl = 'debug';
 
+
+
+//init
 apiKeyModel.sync({})
 	.then(function() {
 		//sync other models
 	})
 	.then(function() {
-		slackClient.addAuthenticatedHandler(rtm, () => listen);
+		slackClient.connect(slackLogLvl);
 	})
+	.then(listen)
 	.catch(console.error);
-
-
-rtm.start();
 
 
 app.use('/timeService', timeServiceRouter);

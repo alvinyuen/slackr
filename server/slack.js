@@ -4,11 +4,13 @@ var RtmClient = require('@slack/client').RtmClient;
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
+const nlp = require('./witClient.js').witClient;
+const apiKeyModel = require('../model/api.js');
 let rtm = null;
-let nlp = null;
 
-
-var channel = '#general';
+let retSlackToken = function() {
+	return apiKeyModel.getSlackToken();
+};
 
 //authentication handler
 let handleOnAuthenticated = (rtmStartData) => {
@@ -28,25 +30,23 @@ let handleOnMessage = (message) => {
 				console.log(err);
 				return;
 			}
-
-			try{
-				if(!res.intent || !res.intent[0] || !res.intent[0].value){
+			try {
+				if (!res.intent || !res.intent[0] || !res.intent[0].value) {
 					throw new Error('Could not extract intent');
 				}
 				//only require according to intent response
-				const intent = require('./intents/'+res.intent[0].value+'Intent');
-				intent.process(res, function(err, res){
-					if(err){
+				const intent = require('./intents/' + res.intent[0].value + 'Intent');
+				intent.process(res, function(err, res) {
+					if (err) {
 						console.log(err.message);
-						return;
+						return rtm.sendMessage(err.message, message.channel);
 					}
 					return rtm.sendMessage(res, message.channel);
 				});
 
-			}
-			catch(err){
-				console.log('error:',err);
-				console.log('response:',res);
+			} catch (err) {
+				console.log('error:', err);
+				console.log('response:', res);
 				rtm.sendMessage(`Sorry, I don't understand what you are talking about`, message.channel);
 			}
 
@@ -55,22 +55,23 @@ let handleOnMessage = (message) => {
 };
 
 
-let addWelcomeMsgHandler = (rtm, handleOnMessage) => {
+let addIntentHandler = (rtm, handleOnMessage) => {
 	rtm.on(RTM_EVENTS.MESSAGE, handleOnMessage);
 };
 
 
-module.exports.connect = (bot_token, debugLvl, nlpClient) => {
-
-
-	rtm = new RtmClient(bot_token, {
-		logLevel: debugLvl
-	});
-	nlp = nlpClient;
-	addAuthenticatedHandler(rtm, handleOnAuthenticated);
-	addWelcomeMsgHandler(rtm, handleOnMessage);
-
-	return rtm;
+module.exports.connect = (debugLvl) => {
+	retSlackToken()
+		.then(function(slackToken){
+			rtm = new RtmClient(slackToken.key, {
+				logLevel: debugLvl
+			});
+			addAuthenticatedHandler(rtm, handleOnAuthenticated);
+			addIntentHandler(rtm, handleOnMessage);
+			//start rtm
+			return rtm;
+		}).then(function(rtm){
+			rtm.start();
+		});
 };
 
-module.exports.addAuthenticatedHandler = addAuthenticatedHandler;
