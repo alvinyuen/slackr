@@ -10,7 +10,8 @@ let handleWitResponse = (res) => {
 
 
 let getWitResponse = (token, message, cb) => {
-	request.get('https://api.wit.ai/message')
+	request
+		.get('https://api.wit.ai/message')
 		.set('Authorization', ' Bearer ' + token)
 		.query({
 			v: '20161115'
@@ -29,13 +30,14 @@ let getWitResponse = (token, message, cb) => {
 };
 
 let ask = (message, cb) => {
-	apiKeyModel.getWitAi()
-			.then(function(apiKey) {
-				getWitResponse(apiKey.key, message, cb);
-			});
+	apiKeyModel
+		.getWitAi()
+		.then(function(apiKey) {
+			getWitResponse(apiKey.key, message, cb);
+		});
 };
 
 
 module.exports.witClient = {
-	ask:ask
+	ask: ask
 };

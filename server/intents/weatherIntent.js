@@ -8,19 +8,19 @@ const Promise = this.Promise || require('bluebird');
 const agent = require('superagent-promise')(require('superagent'), Promise);
 
 
+module.exports.process = function process(intentData, cb){
 
-module.exports.process = function process(intentData, cb) {
 
-	console.log('parse wit res:', JSON.parse(JSON.stringify(intentData)));
+    console.log('parse wit weather res:', JSON.parse(JSON.stringify(intentData)));
 
-	if (intentData.intent[0].value !== 'time')
+    if (intentData.intent[0].value !== 'weather')
 		return cb(new Error(`Expected time intent, got ${intentData.intent[0].value}`));
 	if (!intentData.location)
-		return cb(new Error('I know you want the time, can you provide me with a location?'));
+		return cb(new Error('I know you want the weather, can you provide me with a location?'));
 
 	const locationName = intentData.location[0].value;
 
-	let googleGeoKey, location, timestamp, latLng, googleTimeZoneKey;
+	let googleGeoKey, location, darkSkyKey, latLng, googleTimeZoneKey;
 
 	apiKeyModel.getGoogleGeo()
 
@@ -42,41 +42,32 @@ module.exports.process = function process(intentData, cb) {
 					console.log(err);
 					cb(true, 'error retrieving geo code');
 				}
-				// res.json(response.body.results[0].geometry.location);
 				location = response.body.results[0].geometry.location;
-				timestamp = +moment().format('X');
 				latLng = location.lat + ',' + location.lng;
 			})
 
 		.then(function() {
-			return apiKeyModel.getGoogleTimeZone()
+			return apiKeyModel.getDarkSkyToken();
 		})
 
-		.then(function(googleTzKey) {
+		.then(function(dsKey) {
+			darkSkyKey = dsKey.key;
+             // https://api.darksky.net/forecast/{token}/37.8267,-122.4233
 
-			googleTimeZoneKey = googleTzKey.key;
-
-			agent.get(`https://maps.googleapis.com/maps/api/timezone/json`)
-				.query({
-					location: `${latLng}`
-				})
-				.query({
-					timestamp: `${timestamp}`
-				})
-				.query({
-					key: googleTimeZoneKey
-				})
+			agent.get(`https://api.darksky.net/forecast/${darkSkyKey}/${latLng}`)
 				.end((err, response) => {
 					if (err) {
 						console.log(err);
-						cb(true, 'error retrieving time zone');
+						cb(true, 'error retrieving weather');
 					}
 					const result = response.body;
-					const timeString = moment.unix(timestamp + result.dstOffset + result.rawOffset).utc().format('dddd, MMMM Do YYYY, h:mm:ss a');
-					cb(false, `The current time in ${locationName} is ${timeString}`);
+                    const temp = result.currently.temperature;
+                    let status = result.currently.summary;
+                    cb(false, `It is currently ${temp}F and currently '${status}'`);
 				});
 		});
 
 	});
 
-}
+};
+

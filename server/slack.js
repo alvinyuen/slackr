@@ -1,9 +1,9 @@
 'use strict'
 
-var RtmClient = require('@slack/client').RtmClient;
-var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
-var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
-var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
+const RtmClient = require('@slack/client').RtmClient;
+const CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
+const RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+const RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
 const nlp = require('./witClient.js').witClient;
 const apiKeyModel = require('../model/api.js');
 let rtm = null;

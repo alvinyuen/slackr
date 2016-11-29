@@ -45,6 +45,14 @@ let apiConfig = {
 					name: 'slacktoken'
 				}
 			});
+		},
+
+		getDarkSkyToken: function(){
+			return this.findOne({
+				where: {
+					name: 'darkskytoken'
+				}
+			})
 		}
 	}
 };
